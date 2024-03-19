@@ -9,7 +9,7 @@ import android.widget.Button
 import android.widget.EditText
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
-import com.cst.cstacademy2024.BuildConfig
+import com.android.volley.BuildConfig
 
 import com.android.volley.Request
 import com.android.volley.Response
@@ -44,12 +44,17 @@ class LoginFragment : Fragment() {
         findNavController().navigate(action)
     }
 
+    private fun goToProductList(token: String) {
+        val action = LoginFragmentDirections.actionFragmentLoginToProductListFragment(token)
+        findNavController().navigate(action)
+    }
+
     private fun doLogin() {
         val username = view?.findViewById<EditText>(R.id.et_user_name)?.text?.toString() ?: ""
         val password = view?.findViewById<EditText>(R.id.et_password)?.text?.toString() ?: ""
         val loginModel = when (BuildConfig.DEBUG) {
             true -> LoginModel("mor_2314", "83r5^_")
-            false -> LoginModel(username, password)
+            false -> LoginModel("mor_2314", "83r5^_")
         }
         // Call the login method from the view model
 
@@ -65,6 +70,7 @@ class LoginFragment : Fragment() {
                 try {
                     val token = jsonResponse.getString("token")
                     "Token: $token".logErrorMessage()
+                    goToProductList(token)
                 } catch (e: Exception) {
                     e.message?.logErrorMessage()
                 }
