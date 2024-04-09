@@ -12,6 +12,7 @@ import com.android.volley.Request
 import com.android.volley.Response
 import com.android.volley.toolbox.StringRequest
 import com.cst.cstacademy2024.adapters.ProductListAdapter
+import com.cst.cstacademy2024.data.repositories.ProductRepository
 import com.cst.cstacademy2024.helpers.extensions.VolleyRequestQueue
 import com.cst.cstacademy2024.helpers.extensions.logErrorMessage
 import com.cst.cstacademy2024.models.CartItemModel
@@ -66,6 +67,15 @@ class ProductListFragment : Fragment() {
             { response ->
                 val responseList =
                     Gson().fromJson(response, Array<ProductAPIResponse>::class.java).toList()
+
+
+                responseList.getOrNull(0)?.let {
+                    product ->
+                    ProductRepository.insertAllProduct(responseList)
+                    {
+                        "Product Inserted".logErrorMessage()
+                    }
+                }
 
                 responseList.groupBy { it.category }
                     .forEach { (category, products) ->
