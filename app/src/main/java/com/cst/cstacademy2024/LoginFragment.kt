@@ -15,6 +15,7 @@ import com.android.volley.Request
 import com.android.volley.Response
 import com.android.volley.toolbox.StringRequest
 import com.android.volley.toolbox.Volley
+import com.cst.cstacademy2024.helpers.extensions.VolleyRequestQueue
 import com.cst.cstacademy2024.helpers.extensions.logErrorMessage
 import com.cst.cstacademy2024.models.LoginModel
 import org.json.JSONObject
@@ -56,8 +57,6 @@ class LoginFragment : Fragment() {
             false -> LoginModel(username, password)
         }
         // Call the login method from the view model
-
-        val queue = Volley.newRequestQueue(context ?: return)
         val url = "https://fakestoreapi.com/auth/login"
 
         val stringRequest = object: StringRequest(
@@ -86,7 +85,7 @@ class LoginFragment : Fragment() {
 
         }
 
-        queue.add(stringRequest)
+        VolleyRequestQueue.addToRequestQueue(stringRequest)
     }
 
 

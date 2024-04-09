@@ -8,22 +8,27 @@ import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.android.volley.Request
+import com.android.volley.Response
+import com.android.volley.toolbox.StringRequest
 import com.cst.cstacademy2024.adapters.ProductListAdapter
+import com.cst.cstacademy2024.helpers.extensions.VolleyRequestQueue
 import com.cst.cstacademy2024.helpers.extensions.logErrorMessage
 import com.cst.cstacademy2024.models.CartItemModel
 import com.cst.cstacademy2024.models.CategoryModel
+import com.cst.cstacademy2024.models.ProductAPIResponse
 import com.cst.cstacademy2024.models.ProductModel
+import com.google.gson.Gson
+import org.json.JSONObject
 
 class ProductListFragment : Fragment() {
 
     private val itemList = ArrayList<CartItemModel>()
     private val adapter = ProductListAdapter(itemList)
 
-    val arguments : ProductListFragmentArgs by navArgs()
+    val arguments: ProductListFragmentArgs by navArgs()
     override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
+        inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ) = inflater.inflate(R.layout.fragment_product_list, container, false)
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -33,6 +38,7 @@ class ProductListFragment : Fragment() {
         //log the token
         token.logErrorMessage()
         setupProductList()
+        getCartItems()
     }
 
     private fun setupProductList() {
@@ -48,7 +54,38 @@ class ProductListFragment : Fragment() {
     }
 
     private fun getCartItems() {
-        // use volley to get the list of products from the API
-        
+        val url = "https://fakestoreapi.com/products"
+
+        val stringRequest = StringRequest(Request.Method.GET, url, { response ->
+            val responseList =
+                Gson().fromJson(response, Array<ProductAPIResponse>::class.java).toList()
+            responseList.groupBy { it.category }
+                .forEach { (category, products) ->
+                    itemList.add(
+                        CategoryModel(
+                            id = category.hashCode(),
+                            name = category,
+                            description = "Category Description"
+                        ))
+                    products.forEach { product ->
+                        itemList.add(
+                            ProductModel(
+                                id = product.id,
+                                name = product.name,
+                                description = product.description,
+                            )
+                        )
+                    }
+                }
+
+            adapter.notifyItemRangeInserted(0, itemList.size)
+
+            "Success".logErrorMessage()
+        }, {
+            "Error".logErrorMessage()
+        })
+
+        VolleyRequestQueue.addToRequestQueue(stringRequest)
+
     }
 }
